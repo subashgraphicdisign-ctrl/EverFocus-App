@@ -8,7 +8,7 @@ URL = "https://euwkypgzqmbqtigoluza.supabase.co"
 KEY = "sb_publishable_v4ePATXMmbnE4aRxwjsIhA_9CsjORUJ"
 supabase: Client = create_client(URL, KEY)
 
-st.set_page_config(page_title="Ever Focus Technologies", layout="wide")
+st.set_page_config(page_title="Ever Focus Technologies", page_icon="🚀", layout="wide")
 
 # --- UI STYLE ---
 st.markdown("""
@@ -17,8 +17,13 @@ st.markdown("""
     .company-header {
         text-align: center !important; color: #00d4ff !important;
         font-family: 'Arial Black', sans-serif; font-size: 2.5rem !important;
-        margin-top: -30px; margin-bottom: 30px; text-transform: uppercase;
+        margin-top: -30px; margin-bottom: 5px; text-transform: uppercase;
         text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+    }
+    .developer-tag {
+        text-align: center !important; color: #888;
+        font-family: 'Arial', sans-serif; font-size: 1.1rem;
+        margin-bottom: 30px; font-weight: bold;
     }
     .stButton>button { width: 100%; border: 1px solid #00d4ff; color: #00d4ff; background: transparent; font-weight: bold; }
     .stButton>button:hover { background: #00d4ff; color: #000; }
@@ -26,11 +31,13 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 if 'auth' not in st.session_state: st.session_state.auth = False
+
+# --- HEADER & DEVELOPER INFO ---
 st.markdown("<div class='company-header'>EVER FOCUS TECHNOLOGIES PVT LTD</div>", unsafe_allow_html=True)
+st.markdown("<div class='developer-tag'>Powered by Peshala Subash</div>", unsafe_allow_html=True)
 
 # --- 📊 SMART DATA FETCHING ---
 def fetch_inventory_summary(table_name):
-    """එකම අයිටම් එකතු කරලා (Group By) Dashboard එකට පෙන්වනවා"""
     try:
         res = supabase.table(table_name).select("item_name, quantity").execute()
         if res.data:
@@ -41,9 +48,7 @@ def fetch_inventory_summary(table_name):
     return pd.DataFrame(columns=['item_name', 'quantity'])
 
 def log_to_archive(site, loc, item_name, qty_val, type_label):
-    """ඔයාගේ transactions table එකේ තියෙන හරියටම column names වලට ලියනවා"""
     try:
-        # මෙතන column names ඔයාගේ table එකේ තියෙන ඒවාටම (item, qty, type) ගැලපුවා
         supabase.table('transactions').insert({
             "site_name": site,
             "location": loc,
@@ -64,6 +69,8 @@ if not st.session_state.auth:
             if u == "admin" and p == "1234":
                 st.session_state.auth = True
                 st.rerun()
+            else:
+                st.error("Invalid Credentials")
 else:
     menu = ["📊 DASHBOARD", "📥 ADD RESOURCE", "🚛 TRUCK LOGISTICS", "🏗️ SITE DEPLOYMENT", "📜 DATA ARCHIVE"]
     choice = st.sidebar.selectbox("Protocol Control", menu)
@@ -100,10 +107,10 @@ else:
     elif choice == "🚛 TRUCK LOGISTICS":
         st.subheader("Move to Truck")
         m_df = fetch_inventory_summary('inventory')
-        item = st.selectbox("Select Item", m_df['item_name'].unique() if not m_df.empty else [])
+        item_list = m_df['item_name'].unique() if not m_df.empty else []
+        item = st.selectbox("Select Item", item_list)
         qty = st.number_input("Transfer Quantity", min_value=1)
         if st.button("Execute Transfer"):
-            # Inventory එකෙන් අඩු කරලා Truck එකට දානවා
             supabase.table('inventory').insert({"item_name": item, "quantity": -qty}).execute()
             supabase.table('truck_stock').insert({"item_name": item, "quantity": qty}).execute()
             log_to_archive("TRUCK", "LOAD", item, qty, "TRANSFER")
@@ -115,10 +122,10 @@ else:
         site = st.text_input("Client/Site Name")
         loc = st.text_input("Project Location")
         t_df = fetch_inventory_summary('truck_stock')
-        item = st.selectbox("Item from Truck", t_df['item_name'].unique() if not t_df.empty else [])
+        item_list = t_df['item_name'].unique() if not t_df.empty else []
+        item = st.selectbox("Item from Truck", item_list)
         qty = st.number_input("Issue Qty", min_value=1)
         if st.button("Confirm Issue"):
-            # Truck එකෙන් අඩු කරනවා
             supabase.table('truck_stock').insert({"item_name": item, "quantity": -qty}).execute()
             log_to_archive(site, loc, item, qty, "SITE ISSUE")
             st.success(f"Deployed to {site}")
@@ -127,14 +134,12 @@ else:
     elif choice == "📜 DATA ARCHIVE":
         st.subheader("Cloud Transaction History")
         search = st.text_input("🔍 Search History (Site or Item)")
-        # දත්ත ගේන්නේ created_at එකට අනුව අන්තිමටම කරපු එක උඩට එන විදිහට
         res = supabase.table('transactions').select("*").order('created_at', desc=True).execute()
         if res.data:
             df = pd.DataFrame(res.data)
             if search:
                 df = df[df.astype(str).apply(lambda x: x.str.contains(search, case=False)).any(axis=1)]
             
-            # Column Names ටික ඔයාගේ table එකේ තියෙන ඒවාට අනුව Rename කළා
             df = df.rename(columns={
                 'created_at': 'TIME',
                 'site_name': 'SITE/CLIENT',
@@ -152,4 +157,12 @@ else:
         st.session_state.auth = False
         st.rerun()
 
-st.markdown("<div style='text-align: right; color: gray; font-size: 0.7rem;'>v3.5 Build | Ever Focus Cloud</div>", unsafe_allow_html=True)
+# --- FOOTER ---
+st.markdown("---")
+st.markdown(
+    "<div style='text-align: center; color: gray; font-size: 0.8rem;'>"
+    "© 2026 Ever Focus Technologies | Design & Development by <b>Peshala Subash</b>"
+    "</div>", 
+    unsafe_allow_html=True
+)
+st.markdown("<div style='text-align: right; color: #444; font-size: 0.7rem;'>v3.6 Build | Ever Focus Cloud</div>", unsafe_allow_html=True)

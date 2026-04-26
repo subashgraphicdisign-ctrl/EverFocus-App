@@ -47,14 +47,15 @@ def fetch_inventory_summary(table_name):
     except: pass
     return pd.DataFrame(columns=['item_name', 'quantity'])
 
-def log_to_archive(site, loc, item_name, qty_val, type_label):
+def log_to_archive(site, loc, item_name, qty_val, type_label, serial="N/A"):
     try:
         supabase.table('transactions').insert({
             "site_name": site,
             "location": loc,
             "item": item_name, 
             "qty": qty_val,    
-            "type": type_label
+            "type": type_label,
+            "serial_no": serial
         }).execute()
     except Exception as e:
         st.error(f"Archive Write Error: {e}")
@@ -121,19 +122,20 @@ else:
         st.subheader("Field Issue")
         site = st.text_input("Client/Site Name")
         loc = st.text_input("Project Location")
+        serial = st.text_input("Serial Number (If any)")
         t_df = fetch_inventory_summary('truck_stock')
         item_list = t_df['item_name'].unique() if not t_df.empty else []
         item = st.selectbox("Item from Truck", item_list)
         qty = st.number_input("Issue Qty", min_value=1)
         if st.button("Confirm Issue"):
             supabase.table('truck_stock').insert({"item_name": item, "quantity": -qty}).execute()
-            log_to_archive(site, loc, item, qty, "SITE ISSUE")
-            st.success(f"Deployed to {site}")
+            log_to_archive(site, loc, item, qty, "SITE ISSUE", serial)
+            st.success(f"Deployed to {site} (Serial: {serial})")
 
     # 5. DATA ARCHIVE
     elif choice == "📜 DATA ARCHIVE":
         st.subheader("Cloud Transaction History")
-        search = st.text_input("🔍 Search History (Site or Item)")
+        search = st.text_input("🔍 Search History (Site, Item or Serial)")
         res = supabase.table('transactions').select("*").order('created_at', desc=True).execute()
         if res.data:
             df = pd.DataFrame(res.data)
@@ -146,10 +148,12 @@ else:
                 'location': 'LOCATION',
                 'item': 'ITEM NAME',
                 'qty': 'QTY',
-                'type': 'ACTIVITY'
+                'type': 'ACTIVITY',
+                'serial_no': 'SERIAL NO'
             })
-            st.dataframe(df[['TIME', 'SITE/CLIENT', 'LOCATION', 'ITEM NAME', 'QTY', 'ACTIVITY']], 
-                         use_container_width=True, hide_index=True)
+            # පෙන්වන columns ටික පිළිවෙළට මෙතන දාලා තියෙනවා
+            display_cols = ['TIME', 'SITE/CLIENT', 'LOCATION', 'ITEM NAME', 'SERIAL NO', 'QTY', 'ACTIVITY']
+            st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
         else:
             st.warning("No records found in transactions table.")
 
@@ -165,4 +169,4 @@ st.markdown(
     "</div>", 
     unsafe_allow_html=True
 )
-st.markdown("<div style='text-align: right; color: #444; font-size: 0.7rem;'>v3.6 Build | Ever Focus Cloud</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: right; color: #444; font-size: 0.7rem;'>v3.7 Build | Ever Focus Cloud</div>", unsafe_allow_html=True)

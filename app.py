@@ -93,7 +93,7 @@ if 'auth' not in st.session_state: st.session_state.auth = False
 
 # --- HEADER & DEVELOPER INFO ---
 st.markdown("<div class='company-header'>EVER FOCUS TECHNOLOGIES</div>", unsafe_allow_html=True)
-st.markdown("<div class='developer-tag'POWERD BY : PESHALA SUBHASH</div>", unsafe_allow_html=True)
+st.markdown("<div class='developer-tag'>POWERD BY : PESHALA SUBHASH</div>", unsafe_allow_html=True)
 
 # --- 📊 SMART DATA FETCHING ---
 def fetch_inventory_summary(table_name):

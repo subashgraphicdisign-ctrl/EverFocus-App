@@ -93,7 +93,7 @@ if 'auth' not in st.session_state: st.session_state.auth = False
 
 # --- HEADER & DEVELOPER INFO ---
 st.markdown("<div class='company-header'>EVER FOCUS TECHNOLOGIES</div>", unsafe_allow_html=True)
-st.markdown("<div class='developer-tag'>>_ System Architect: Peshala Subash</div>", unsafe_allow_html=True)
+st.markdown("<div class='developer-tag'POWERD BY : PESHALA SUBHASH</div>", unsafe_allow_html=True)
 
 # --- 📊 SMART DATA FETCHING ---
 def fetch_inventory_summary(table_name):
@@ -219,4 +219,4 @@ else:
 
 # --- FOOTER ---
 st.markdown("---")
-st.markdown("<div style='text-align: center; color: #64ffda; font-size: 0.8rem; font-family: monospace;'>EVER FOCUS CLOUD NETWORK v4.0 | AUTH: PESHALA SUBASH</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #64ffda; font-size: 0.8rem; font-family: monospace;'>EVER FOCUS CLOUD NETWORK v4.0 | POWERD BY: PESHALA SUBHASH</div>", unsafe_allow_html=True)

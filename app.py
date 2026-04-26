@@ -10,31 +10,90 @@ supabase: Client = create_client(URL, KEY)
 
 st.set_page_config(page_title="Ever Focus Technologies", page_icon="🚀", layout="wide")
 
-# --- UI STYLE ---
+# --- UI STYLE (TECHNOLOGY THEME) ---
 st.markdown("""
     <style>
-    .stApp { background-color: #0b0e14; color: #e0e0e0; }
+    /* 🌌 Main Background with Tech Gradient */
+    .stApp {
+        background: radial-gradient(circle at top right, #0a192f, #020c1b);
+        color: #e6f1ff;
+    }
+
+    /* 🏢 Professional Tech Header */
     .company-header {
-        text-align: center !important; color: #00d4ff !important;
-        font-family: 'Arial Black', sans-serif; font-size: 2.5rem !important;
-        margin-top: -30px; margin-bottom: 5px; text-transform: uppercase;
-        text-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+        text-align: center !important; 
+        background: -webkit-linear-gradient(#00d4ff, #0072ff);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 3rem !important;
+        font-weight: 800;
+        margin-top: -40px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
     }
+
     .developer-tag {
-        text-align: center !important; color: #888;
-        font-family: 'Arial', sans-serif; font-size: 1.1rem;
-        margin-bottom: 30px; font-weight: bold;
+        text-align: center !important; 
+        color: #64ffda;
+        font-family: 'Courier New', monospace;
+        font-size: 1rem;
+        margin-bottom: 40px;
+        opacity: 0.8;
     }
-    .stButton>button { width: 100%; border: 1px solid #00d4ff; color: #00d4ff; background: transparent; font-weight: bold; }
-    .stButton>button:hover { background: #00d4ff; color: #000; }
+
+    /* 🧪 Glassmorphism Cards for Input Fields & Tables */
+    div[data-testid="stMetric"] {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 20px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+
+    /* ⚪ White Labels Fix */
+    .stApp label, .stWidgetLabel p {
+        color: #00d4ff !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.5px;
+    }
+
+    /* 💎 Modern Buttons */
+    .stButton>button {
+        width: 100%;
+        border-radius: 8px;
+        border: 1px solid #64ffda;
+        color: #64ffda;
+        background: rgba(100, 255, 218, 0.05);
+        font-weight: bold;
+        transition: all 0.3s ease;
+        height: 3em;
+    }
+    .stButton>button:hover {
+        background: #64ffda;
+        color: #020c1b;
+        box-shadow: 0 0 20px rgba(100, 255, 218, 0.4);
+    }
+
+    /* 📟 Sidebar Styling */
+    [data-testid="stSidebar"] {
+        background-color: #0a192f;
+        border-right: 1px solid rgba(100, 255, 218, 0.1);
+    }
+
+    /* Dataframe (Table) Styling */
+    .stDataFrame {
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        border-radius: 10px;
+    }
     </style>
     """, unsafe_allow_html=True)
 
 if 'auth' not in st.session_state: st.session_state.auth = False
 
 # --- HEADER & DEVELOPER INFO ---
-st.markdown("<div class='company-header'>EVER FOCUS TECHNOLOGIES PVT LTD</div>", unsafe_allow_html=True)
-st.markdown("<div class='developer-tag'>Powered by Peshala Subash</div>", unsafe_allow_html=True)
+st.markdown("<div class='company-header'>EVER FOCUS TECHNOLOGIES</div>", unsafe_allow_html=True)
+st.markdown("<div class='developer-tag'>>_ System Architect: Peshala Subash</div>", unsafe_allow_html=True)
 
 # --- 📊 SMART DATA FETCHING ---
 def fetch_inventory_summary(table_name):
@@ -47,7 +106,7 @@ def fetch_inventory_summary(table_name):
     except: pass
     return pd.DataFrame(columns=['item_name', 'quantity'])
 
-def log_to_archive(site, loc, item_name, qty_val, type_label, serial="N/A"):
+def log_to_archive(site, loc, item_name, qty_val, type_label, serial="None"):
     try:
         supabase.table('transactions').insert({
             "site_name": site,
@@ -63,18 +122,18 @@ def log_to_archive(site, loc, item_name, qty_val, type_label, serial="N/A"):
 # --- APP NAVIGATION ---
 if not st.session_state.auth:
     with st.columns([1,1.5,1])[1]:
-        st.markdown("### SYSTEM LOGIN")
+        st.markdown("<h3 style='text-align:center; color:#64ffda;'>SECURE ACCESS</h3>", unsafe_allow_html=True)
         u = st.text_input("USER ID")
         p = st.text_input("PASSWORD", type="password")
-        if st.button("LOGIN"):
+        if st.button("AUTHENTICATE"):
             if u == "admin" and p == "1234":
                 st.session_state.auth = True
                 st.rerun()
             else:
-                st.error("Invalid Credentials")
+                st.error("Access Denied")
 else:
     menu = ["📊 DASHBOARD", "📥 ADD RESOURCE", "🚛 TRUCK LOGISTICS", "🏗️ SITE DEPLOYMENT", "📜 DATA ARCHIVE"]
-    choice = st.sidebar.selectbox("Protocol Control", menu)
+    choice = st.sidebar.selectbox("PROTOCOL CONTROL", menu)
 
     # 1. DASHBOARD
     if choice == "📊 DASHBOARD":
@@ -82,8 +141,8 @@ else:
         t_df = fetch_inventory_summary('truck_stock')
         
         c1, c2 = st.columns(2)
-        c1.metric("MAIN STORE TOTAL", f"{int(m_df['quantity'].sum()) if not m_df.empty else 0} PKTS")
-        c2.metric("TRUCK STOCK TOTAL", f"{int(t_df['quantity'].sum()) if not t_df.empty else 0} PKTS")
+        c1.metric("MAIN STORE", f"{int(m_df['quantity'].sum()) if not m_df.empty else 0} PKTS")
+        c2.metric("TRUCK PAYLOAD", f"{int(t_df['quantity'].sum()) if not t_df.empty else 0} PKTS")
         
         st.divider()
         col_left, col_right = st.columns(2)
@@ -96,46 +155,46 @@ else:
 
     # 2. ADD RESOURCE
     elif choice == "📥 ADD RESOURCE":
-        st.subheader("Stock Entry")
+        st.subheader("Stock Entry Protocol")
         item = st.text_input("New Item Name")
         qty = st.number_input("Quantity", min_value=1)
-        if st.button("Update Cloud Inventory"):
+        if st.button("Update Cloud Database"):
             supabase.table('inventory').insert({"item_name": item, "quantity": qty}).execute()
             log_to_archive("MAIN STORE", "ENTRY", item, qty, "STOCK IN")
-            st.success("Successfully logged to Cloud")
+            st.success("Cloud Synchronization Complete")
 
     # 3. TRUCK LOGISTICS
     elif choice == "🚛 TRUCK LOGISTICS":
-        st.subheader("Move to Truck")
+        st.subheader("Logistics Transfer")
         m_df = fetch_inventory_summary('inventory')
         item_list = m_df['item_name'].unique() if not m_df.empty else []
-        item = st.selectbox("Select Item", item_list)
+        item = st.selectbox("Select Resource", item_list)
         qty = st.number_input("Transfer Quantity", min_value=1)
-        if st.button("Execute Transfer"):
+        if st.button("Authorize Transfer"):
             supabase.table('inventory').insert({"item_name": item, "quantity": -qty}).execute()
             supabase.table('truck_stock').insert({"item_name": item, "quantity": qty}).execute()
             log_to_archive("TRUCK", "LOAD", item, qty, "TRANSFER")
-            st.success("Logistics record created")
+            st.success("Logistics Route Verified")
 
     # 4. SITE DEPLOYMENT
     elif choice == "🏗️ SITE DEPLOYMENT":
-        st.subheader("Field Issue")
-        site = st.text_input("Client/Site Name")
-        loc = st.text_input("Project Location")
-        serial = st.text_input("Serial Number (If any)")
+        st.subheader("Field Deployment")
+        site = st.text_input("Client/Site ID")
+        loc = st.text_input("Geo Location")
+        serial_no = st.text_input("Asset Serial Number")
         t_df = fetch_inventory_summary('truck_stock')
         item_list = t_df['item_name'].unique() if not t_df.empty else []
-        item = st.selectbox("Item from Truck", item_list)
-        qty = st.number_input("Issue Qty", min_value=1)
-        if st.button("Confirm Issue"):
+        item = st.selectbox("Resource from Truck", item_list)
+        qty = st.number_input("Deployment Qty", min_value=1)
+        if st.button("Confirm Deployment"):
             supabase.table('truck_stock').insert({"item_name": item, "quantity": -qty}).execute()
-            log_to_archive(site, loc, item, qty, "SITE ISSUE", serial)
-            st.success(f"Deployed to {site} (Serial: {serial})")
+            log_to_archive(site, loc, item, qty, "SITE ISSUE", serial_no)
+            st.success(f"Deployed to {site}")
 
     # 5. DATA ARCHIVE
     elif choice == "📜 DATA ARCHIVE":
-        st.subheader("Cloud Transaction History")
-        search = st.text_input("🔍 Search History (Site, Item or Serial)")
+        st.subheader("Transaction Intelligence")
+        search = st.text_input("🔍 Query Database (Site, Item, Serial)")
         res = supabase.table('transactions').select("*").order('created_at', desc=True).execute()
         if res.data:
             df = pd.DataFrame(res.data)
@@ -143,30 +202,21 @@ else:
                 df = df[df.astype(str).apply(lambda x: x.str.contains(search, case=False)).any(axis=1)]
             
             df = df.rename(columns={
-                'created_at': 'TIME',
-                'site_name': 'SITE/CLIENT',
+                'created_at': 'TIMESTAMP',
+                'site_name': 'CLIENT',
                 'location': 'LOCATION',
-                'item': 'ITEM NAME',
+                'item': 'RESOURCE',
                 'qty': 'QTY',
-                'type': 'ACTIVITY',
-                'serial_no': 'SERIAL NO'
+                'type': 'STATUS',
+                'serial_no': 'SERIAL_ID'
             })
-            # පෙන්වන columns ටික පිළිවෙළට මෙතන දාලා තියෙනවා
-            display_cols = ['TIME', 'SITE/CLIENT', 'LOCATION', 'ITEM NAME', 'SERIAL NO', 'QTY', 'ACTIVITY']
-            st.dataframe(df[display_cols], use_container_width=True, hide_index=True)
-        else:
-            st.warning("No records found in transactions table.")
+            cols = ['TIMESTAMP', 'CLIENT', 'LOCATION', 'RESOURCE', 'SERIAL_ID', 'QTY', 'STATUS']
+            st.dataframe(df[cols], use_container_width=True, hide_index=True)
 
-    if st.sidebar.button("Logout"):
+    if st.sidebar.button("System Logout"):
         st.session_state.auth = False
         st.rerun()
 
 # --- FOOTER ---
 st.markdown("---")
-st.markdown(
-    "<div style='text-align: center; color: gray; font-size: 0.8rem;'>"
-    "© 2026 Ever Focus Technologies | Design & Development by <b>Peshala Subash</b>"
-    "</div>", 
-    unsafe_allow_html=True
-)
-st.markdown("<div style='text-align: right; color: #444; font-size: 0.7rem;'>v3.7 Build | Ever Focus Cloud</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; color: #64ffda; font-size: 0.8rem; font-family: monospace;'>EVER FOCUS CLOUD NETWORK v4.0 | AUTH: PESHALA SUBASH</div>", unsafe_allow_html=True)
